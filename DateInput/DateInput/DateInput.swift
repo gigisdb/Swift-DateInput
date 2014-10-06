@@ -52,6 +52,7 @@ class DayView: UIView {
     struct Constants {
         static let width  = 44
         static let height = 44
+        static let size   = CGSize(width: width, height: height)
     }
 
     var date: NSDate! {
@@ -68,7 +69,7 @@ class DayView: UIView {
             return (0..<7).map { weekday -> DayView in
                 let x     = Constants.width  * weekday
                 let y     = Constants.height * weekOfMonth
-                let frame = CGRect(x: x, y: y, width: Constants.width, height: Constants.height)
+                let frame = CGRect(origin: CGPoint(x: x, y: y), size: Constants.size)
                
                 let dayView = DayView(frame: frame, weekday: weekday)
 
