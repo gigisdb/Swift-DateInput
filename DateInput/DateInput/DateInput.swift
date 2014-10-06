@@ -18,6 +18,36 @@ extension UIColor {
     }
 }
 
+class DayView: UIView {
+    var day: Int? {
+        didSet {
+            if let day = self.day {
+                self.label.text = "\(day)"
+            } else {
+                self.label.text = ""
+            }
+        }
+    }
+
+    private var label: UILabel!
+
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        
+        self.label = UILabel(frame: self.frame)
+    }
+
+    init (frame: CGRect, weekday: Int) {
+        super.init(frame: frame)
+        
+        self.label = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, size: frame.size))
+        self.label.textAlignment = .Center
+        self.label.textColor     = UIColor.colorWithWeekday(weekday)
+
+        self.addSubview(self.label)
+    }
+}
+
 @IBDesignable public class DateInput: UIScrollView {
     struct Constants {
         static let width  = 44
@@ -30,33 +60,31 @@ extension UIColor {
         }
     }
    
-    var dayTextList = [[UILabel]]()
+    var dayViewList = [[DayView]]()
     required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        func labels (weekOfMonth: Int) -> [UILabel] {
-            return (0..<7).map { weekday -> UILabel in
-                let x = Constants.width  * weekday
-                let y = Constants.height * weekOfMonth
+        func dayViews (weekOfMonth: Int) -> [DayView] {
+            return (0..<7).map { weekday -> DayView in
+                let x     = Constants.width  * weekday
+                let y     = Constants.height * weekOfMonth
                 let frame = CGRect(x: x, y: y, width: Constants.width, height: Constants.height)
                
-                let label = UILabel(frame: frame)
-                label.textAlignment = .Center
-                label.textColor     = UIColor.colorWithWeekday(weekday)
+                let dayView = DayView(frame: frame, weekday: weekday)
 
-                self.addSubview(label)
+                self.addSubview(dayView)
                 
-                return label
+                return dayView
             }
         }
 
-        self.dayTextList = (0..<6).map(labels)
+        self.dayViewList = (0..<6).map(dayViews)
     }
 
     func configureView (date: NSDate) {
         var row = 0
         eachDay(date, block: { year, month, day, weekday in
-            self.dayTextList[row][weekday].text = "\(day)"
+            self.dayViewList[row][weekday].day = day
 
             if (weekday == 6) { row++ }
         })
