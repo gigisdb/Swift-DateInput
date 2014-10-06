@@ -48,7 +48,7 @@ class DayView: UIView {
     }
 }
 
-@IBDesignable public class DateInput: UIScrollView {
+public class DateInput: UIScrollView {
     struct Constants {
         static let width  = 44
         static let height = 44
