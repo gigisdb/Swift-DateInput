@@ -19,6 +19,8 @@ extension UIColor {
 }
 
 class DayView: UIView {
+    var callback: ((Int) -> ())?
+
     var day: Int? {
         didSet {
             if let day = self.day {
@@ -46,6 +48,10 @@ class DayView: UIView {
 
         self.addSubview(self.label)
     }
+
+    override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
+        if self.callback != nil { self.callback!(self.day!) }
+    }
 }
 
 public class DateInput: UIScrollView {
@@ -55,6 +61,13 @@ public class DateInput: UIScrollView {
         static let size   = CGSize(width: width, height: height)
     }
 
+    public var callback: ((year: Int, month: Int, day: Int) -> ())? {
+        didSet {
+            let f = { d in self.callback!(year: self.date.year, month: self.date.month, day: d) }
+            for v in self.flatDayViewList { v.callback = f }
+        }
+    }
+
     var date: NSDate! {
         didSet {
             configureView(date)
@@ -62,6 +75,10 @@ public class DateInput: UIScrollView {
     }
    
     var dayViewList = [[DayView]]()
+    var flatDayViewList: [DayView] {
+        return dayViewList.reduce([DayView](), combine: +)
+    }
+
     required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
@@ -91,7 +108,7 @@ public class DateInput: UIScrollView {
         })
     }
 
-    private func eachDay (date: NSDate, block: (year: Int, month: Int, day: Int, weekday: Int) -> Void) {
+    private func eachDay (date: NSDate, block: (year: Int, month: Int, day: Int, weekday: Int) -> ()) {
         let year    = date.year
         let month   = date.month
         let lastDay = date.lastDay
