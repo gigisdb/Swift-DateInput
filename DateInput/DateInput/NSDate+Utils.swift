@@ -12,7 +12,7 @@ enum Weekday: Int {
     case Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 }
 func + (lhs: Weekday, rhs: Int) -> Weekday {
-    return Weekday.fromRaw((lhs.toRaw() + rhs) % 7)!
+    return Weekday(rawValue: (lhs.rawValue + rhs) % 7)!
 }
 
 extension NSDate {
