@@ -18,15 +18,14 @@ extension UIColor {
     }
 }
 
-class DayView: UIView {
-    var callback: ((Int) -> ())?
-
+class DayView: UIButton {
     var day: Int? {
         didSet {
             if let day = self.day {
                 self.label.text = "\(day)"
+                self.hidden     = false
             } else {
-                self.label.text = ""
+                self.hidden = true
             }
         }
     }
@@ -41,16 +40,14 @@ class DayView: UIView {
 
     init (frame: CGRect, weekday: Int) {
         super.init(frame: frame)
-        
+
+        self.hidden = true
+
         self.label = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, size: frame.size))
         self.label.textAlignment = .Center
         self.label.textColor     = UIColor.colorWithWeekday(weekday)
 
         self.addSubview(self.label)
-    }
-
-    override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
-        if self.callback != nil { self.callback!(self.day!) }
     }
 }
 
@@ -61,12 +58,7 @@ public class DateInput: UIScrollView {
         static let size   = CGSize(width: width, height: height)
     }
 
-    public var callback: ((year: Int, month: Int, day: Int) -> ())? {
-        didSet {
-            let f = { d in self.callback!(year: self.date.year, month: self.date.month, day: d) }
-            for v in self.flatDayViewList { v.callback = f }
-        }
-    }
+    public var callback: ((year: Int, month: Int, day: Int) -> ())?
 
     var date: NSDate! {
         didSet {
@@ -89,6 +81,7 @@ public class DateInput: UIScrollView {
                 let frame = CGRect(origin: CGPoint(x: x, y: y), size: Constants.size)
                
                 let dayView = DayView(frame: frame, weekday: weekday)
+                dayView.addTarget(self, action: "onTouchDayView:", forControlEvents: .TouchUpInside)
 
                 self.addSubview(dayView)
                 
@@ -97,6 +90,13 @@ public class DateInput: UIScrollView {
         }
 
         self.dayViewList = (0..<6).map(dayViews)
+    }
+
+    func onTouchDayView (sender: DayView) {
+        if self.callback == nil { return }
+
+        // dayがnilの場合は、押せない（非表示になっている）ので、無条件でdayをunwrapする
+        self.callback!(year: self.date.year, month: self.date.month, day: sender.day!)
     }
 
     func configureView (date: NSDate) {
