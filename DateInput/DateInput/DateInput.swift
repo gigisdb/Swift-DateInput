@@ -66,30 +66,27 @@ public class DateInput: UIScrollView {
         }
     }
    
-    var dayViewList = [[DayView]]()
-    var flatDayViewList: [DayView] {
-        return dayViewList.reduce([DayView](), combine: +)
-    }
+    var dayViewList = [DayView]()
 
     required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        func dayViews (weekOfMonth: Int) -> [DayView] {
-            return (0..<7).map { weekday -> DayView in
-                let x     = Constants.width  * weekday
-                let y     = Constants.height * weekOfMonth
-                let frame = CGRect(origin: CGPoint(x: x, y: y), size: Constants.size)
-               
-                let dayView = DayView(frame: frame, weekday: weekday)
-                dayView.addTarget(self, action: "onTouchDayView:", forControlEvents: .TouchUpInside)
+        self.dayViewList = reduce((0..<6), [DayView]()) {$0 + DateInput.dayViews($1)}
 
-                self.addSubview(dayView)
-                
-                return dayView
-            }
+        for dayView in self.dayViewList {
+            dayView.addTarget(self, action: "onTouchDayView:", forControlEvents: .TouchUpInside)
+            self.addSubview(dayView)
         }
+    }
 
-        self.dayViewList = (0..<6).map(dayViews)
+    class func dayViews (weekOfMonth: Int) -> [DayView] {
+        return (0..<7).map { weekday -> DayView in
+            let x     = Constants.width  * weekday
+            let y     = Constants.height * weekOfMonth
+            let frame = CGRect(origin: CGPoint(x: x, y: y), size: Constants.size)
+
+            return DayView(frame: frame, weekday: weekday)
+        }
     }
 
     func onTouchDayView (sender: DayView) {
@@ -100,22 +97,17 @@ public class DateInput: UIScrollView {
     }
 
     func configureView (date: NSDate) {
-        var row = 0
-        eachDay(date, block: { year, month, day, weekday in
-            self.dayViewList[row][weekday].day = day
+        // weekdayが1始まり（Sunday=1）なので、1を引く
+        let startIndex = NSDate(year: date.year, month: date.month, day: 1).weekday - 1
+        let lastDay    = date.lastDay
 
-            if (weekday == 6) { row++ }
-        })
-    }
-
-    private func eachDay (date: NSDate, block: (year: Int, month: Int, day: Int, weekday: Int) -> ()) {
-        let year    = date.year
-        let month   = date.month
-        let lastDay = date.lastDay
-        let weekday = date.weekday
-
-        for day in 1..<lastDay {
-            block(year: year, month: month, day: day, weekday: (weekday + day - 1) % 7)
+        for (index, dayView) in enumerate(dayViewList) {
+            let day = index - startIndex + 1
+            if day < 1 || day > lastDay {
+                dayView.day = nil
+            } else {
+                dayView.day = day
+            }
         }
     }
 }

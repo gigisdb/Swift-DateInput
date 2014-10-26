@@ -9,7 +9,7 @@
 import Foundation
 
 enum Weekday: Int {
-    case Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
+    case Sunday = 1, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 }
 func + (lhs: Weekday, rhs: Int) -> Weekday {
     return Weekday(rawValue: (lhs.rawValue + rhs) % 7)!
