@@ -52,26 +52,79 @@ class DayView: UIButton {
 }
 
 public class DateInput: UIScrollView {
+    private let dateViewList: [DateView]!
+    public var callback: ((year: Int, month: Int, day: Int) -> ())? {
+        didSet {
+            for dateView in self.dateViewList { dateView.callback = callback }
+        }
+    }
+
+    public var date: NSDate! {
+        didSet {
+            for (index, dateView) in enumerate(self.dateViewList) {
+                dateView.date  = date
+                dateView.month = date.month + index - 1
+            }
+        }
+    }
+
+    required public init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+       
+        self.dateViewList = [DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder)]
+        self.contentSize  = self.dateViewList.first!.size * CGSize(width: 1, height: self.dateViewList.count)
+        for (index, dateView) in enumerate(self.dateViewList) {
+            dateView.frame = CGRectOffset(dateView.frame, 0, dateView.size.height * CGFloat(index))
+            self.addSubview(dateView)
+        }
+    }
+}
+
+func * (lhs: CGSize, rhs: CGSize) -> CGSize {
+    return CGSize(width: lhs.width * rhs.width, height: lhs.height * rhs.height)
+}
+
+public class DateView: UIView {
     struct Constants {
         static let width  = 44
         static let height = 44
         static let size   = CGSize(width: width, height: height)
     }
+   
+    public var size: CGSize {
+        get { return Constants.size * CGSize(width: 7, height: 7) }
+    }
 
     public var callback: ((year: Int, month: Int, day: Int) -> ())?
-
-    var date: NSDate! {
+   
+    public var year:  Int! {
         didSet {
-            configureView(date)
+            self.date = NSDate(year: year, month: self.month, day: self.date.day)
         }
     }
-   
+
+    public var month: Int! {
+        didSet {
+            self.date = NSDate(year: self.date.year, month: month, day: self.date.day)
+        }
+    }
+
+    public var date: NSDate! {
+        didSet {
+            configureView(date)
+            self.titleLabel.text = "\(date.year)/\(date.month)"
+        }
+    }
+
+    let titleLabel: UILabel!
     var dayViewList = [DayView]()
 
     required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-
-        self.dayViewList = reduce((0..<6), [DayView]()) {$0 + DateInput.dayViews($1)}
+        self.titleLabel = UILabel(frame: CGRect(origin: CGPoint.zeroPoint,
+                                                  size: CGSize(width: self.frame.size.width, height: 44)))
+        self.addSubview(self.titleLabel)
+        self.dayViewList = reduce((1...6), [DayView]()) {$0 + DateView.dayViews($1)}
 
         for dayView in self.dayViewList {
             dayView.addTarget(self, action: "onTouchDayView:", forControlEvents: .TouchUpInside)
