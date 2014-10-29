@@ -51,7 +51,7 @@ class DayView: UIButton {
     }
 }
 
-public class DateInput: UIScrollView {
+public class DateInput: UIScrollView, UIScrollViewDelegate {
     private let dateViewList: [DateView]!
     public var callback: ((year: Int, month: Int, day: Int) -> ())? {
         didSet {
@@ -71,11 +71,30 @@ public class DateInput: UIScrollView {
     required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
        
-        self.dateViewList = [DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder)]
+        self.dateViewList = [DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder)]
         self.contentSize  = self.dateViewList.first!.size * CGSize(width: 1, height: self.dateViewList.count)
         for (index, dateView) in enumerate(self.dateViewList) {
             dateView.frame = CGRectOffset(dateView.frame, 0, dateView.size.height * CGFloat(index))
             self.addSubview(dateView)
+        }
+    }
+
+    func prev() {
+        self.date = NSDate(year: self.date.year, month: self.date.month - 1, day: self.date.day)
+    }
+
+    func next() {
+        self.date = NSDate(year: self.date.year, month: self.date.month + 1, day: self.date.day)
+    }
+
+
+    public override func layoutSubviews() {
+        if self.contentOffset.y < 0 {
+            dispatch_async(dispatch_get_main_queue(), { self.prev() })
+            self.contentOffset.y = self.dateViewList[1].frame.origin.y
+        } else if self.contentOffset.y > self.dateViewList[2].frame.origin.y {
+            dispatch_async(dispatch_get_main_queue(), { self.next() })
+            self.contentOffset.y = self.dateViewList[1].frame.origin.y
         }
     }
 }
