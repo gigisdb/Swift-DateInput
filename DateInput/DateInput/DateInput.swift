@@ -80,9 +80,6 @@ public class DateInput: UIScrollView {
     }
 }
 
-func * (lhs: CGSize, rhs: CGSize) -> CGSize {
-    return CGSize(width: lhs.width * rhs.width, height: lhs.height * rhs.height)
-}
 
 public class DateView: UIView {
     struct Constants {
