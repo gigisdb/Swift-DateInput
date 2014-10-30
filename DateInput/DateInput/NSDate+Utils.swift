@@ -21,8 +21,19 @@ extension NSDate {
     var day:     Int { return components.day }
     var weekday: Int { return components.weekday }
 
+    var components: (year: Int, month: Int, day: Int, weekday: Int) {
+        let flag = NSCalendarUnit.CalendarUnitYear  |
+            NSCalendarUnit.CalendarUnitMonth |
+            NSCalendarUnit.CalendarUnitDay |
+            NSCalendarUnit.CalendarUnitWeekday
+
+        let components = NSCalendar.currentCalendar().components(flag, fromDate: self)
+        return (components.year, components.month, components.day, components.weekday)
+    }
+
     var lastDay: Int {
-        let date = NSDate(year: components.year, month: components.month + 1, day: 0)
+        let (year, month, _, _) = self.components
+        let date = NSDate(year: year, month: month + 1, day: 0)
 
         return date.day
     }
@@ -36,14 +47,5 @@ extension NSDate {
         let date = NSCalendar.currentCalendar().dateFromComponents(components)
         
         self.init(timeInterval: 0, sinceDate: date!)
-    }
-
-    private var components: NSDateComponents {
-        let flag = NSCalendarUnit.CalendarUnitYear  |
-            NSCalendarUnit.CalendarUnitMonth |
-            NSCalendarUnit.CalendarUnitDay |
-            NSCalendarUnit.CalendarUnitWeekday
-
-        return NSCalendar.currentCalendar().components(flag, fromDate: self)
     }
 }
