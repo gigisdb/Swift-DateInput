@@ -92,10 +92,10 @@ public class DateInput: UIScrollView, UIScrollViewDelegate {
 
     public override func layoutSubviews() {
         if self.contentOffset.y < 0 {
-            dispatch_async(dispatch_get_main_queue(), { self.prev() })
+            self.prev()
             self.contentOffset.y = self.dateViewList[1].frame.origin.y
         } else if self.contentOffset.y > self.dateViewList[2].frame.origin.y {
-            dispatch_async(dispatch_get_main_queue(), { self.next() })
+            self.next()
             self.contentOffset.y = self.dateViewList[1].frame.origin.y
         }
     }
