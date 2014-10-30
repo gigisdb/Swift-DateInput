@@ -71,7 +71,7 @@ public class DateInput: UIScrollView, UIScrollViewDelegate {
     required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
        
-        self.dateViewList = [DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder)]
+        self.dateViewList = (0..<4).map { _ -> DateView in return DateView(coder: aDecoder) }
         self.contentSize  = DateView.size * CGSize(width: 1, height: self.dateViewList.count)
 
         for (index, dateView) in enumerate(self.dateViewList) {
