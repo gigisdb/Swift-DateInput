@@ -72,9 +72,10 @@ public class DateInput: UIScrollView, UIScrollViewDelegate {
         super.init(coder: aDecoder)
        
         self.dateViewList = [DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder), DateView(coder: aDecoder)]
-        self.contentSize  = self.dateViewList.first!.size * CGSize(width: 1, height: self.dateViewList.count)
+        self.contentSize  = DateView.size * CGSize(width: 1, height: self.dateViewList.count)
+
         for (index, dateView) in enumerate(self.dateViewList) {
-            dateView.frame = CGRectOffset(dateView.frame, 0, dateView.size.height * CGFloat(index))
+            dateView.frame = CGRectOffset(dateView.frame, 0, DateView.size.height * CGFloat(index))
             self.addSubview(dateView)
         }
     }
@@ -109,7 +110,7 @@ public class DateView: UIView {
         static let size   = CGSize(width: width, height: height)
     }
    
-    public var size: CGSize {
+    public class var size: CGSize {
         get { return Constants.size * CGSize(width: 7, height: 7) }
     }
 
