@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        self.dateInput.date = NSDate()
+        self.dateInput.reload(year: NSDate().year, month: NSDate().month)
         self.dateInput.callback = { year, month, day in println("DAY: \(year)-\(month)-\(day)") }
     }
 

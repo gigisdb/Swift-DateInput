@@ -53,18 +53,22 @@ class DayView: UIButton {
 
 public class DateInput: UIScrollView, UIScrollViewDelegate {
     private let dateViewList: [DateView]!
+
     public var callback: ((year: Int, month: Int, day: Int) -> ())? {
         didSet {
             for dateView in self.dateViewList { dateView.callback = callback }
         }
     }
 
-    public var date: NSDate! {
-        didSet {
-            let (year, month, day, _) = self.date.components
-            for (index, dateView) in enumerate(self.dateViewList) {
-                dateView.date = NSDate(year: year, month: month + index - 1, day: day)
-            }
+    private var year: Int!
+    private var month: Int!
+
+    public func reload (#year: Int, month: Int, direction: Int = 0) {
+        self.year  = year
+        self.month = month
+
+        for (index, dateView) in enumerate(self.dateViewList) {
+            dateView.date = NSDate(year: year, month: month + index - 1, day: 1)
         }
     }
 
@@ -81,15 +85,12 @@ public class DateInput: UIScrollView, UIScrollViewDelegate {
     }
 
     func prev() {
-        let (year, month, day, _) = self.date.components
-        self.date = NSDate(year: year, month: month - 1, day: day)
+        self.reload(year: self.year, month: self.month - 1)
     }
 
     func next() {
-        let (year, month, day, _) = self.date.components
-        self.date = NSDate(year: year, month: month + 1, day: day)
+        self.reload(year: self.year, month: self.month + 1)
     }
-
 
     public override func layoutSubviews() {
         if self.contentOffset.y < 0 {
@@ -115,19 +116,6 @@ public class DateView: UIView {
     }
 
     public var callback: ((year: Int, month: Int, day: Int) -> ())?
-   
-    public var year:  Int! {
-        didSet {
-            self.date = NSDate(year: year, month: self.month, day: self.date.day)
-        }
-    }
-
-    public var month: Int! {
-        didSet {
-            let (year, _, day, _) = self.date.components
-            self.date = NSDate(year: year, month: month, day: day)
-        }
-    }
 
     public var date: NSDate! {
         didSet {
@@ -173,13 +161,11 @@ public class DateView: UIView {
     }
 
     func configureView (date: NSDate) {
-        let (year, month, _, _) = date.components
-
         // weekdayが1始まり（Sunday=1）なので、1を引く
-        let startIndex = NSDate(year: year, month: month, day: 1).weekday - 1
+        let startIndex = date.weekday - 1
         let lastDay    = date.lastDay
 
-        for (index, dayView) in enumerate(dayViewList) {
+        for (index, dayView) in enumerate(self.dayViewList) {
             let day = index - startIndex + 1
 
             if day < 1 || day > lastDay {
