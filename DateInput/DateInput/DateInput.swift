@@ -120,13 +120,18 @@ public class DateView: UIView {
     }
 
     public var callback: ((year: Int, month: Int, day: Int) -> ())?
+   
+    public var title: String {
+       let (year, month, _, _) = self.date.components
+
+       return "\(year)/\(month)"
+    }
 
     public var date: NSDate! {
         didSet {
             configureView(date)
 
-            let (year, month, _, _) = date.components
-            self.titleLabel.text = "\(year)/\(month)"
+            self.titleLabel.text = self.title
         }
     }
 
