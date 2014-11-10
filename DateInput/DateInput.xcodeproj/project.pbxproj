@@ -15,6 +15,7 @@
 		6291CA6F19E13E5B00ACBA82 /* DateInputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6291CA6E19E13E5B00ACBA82 /* DateInputTests.swift */; };
 		6291CA7919E13E6800ACBA82 /* DateInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6291CA7819E13E6800ACBA82 /* DateInput.swift */; };
 		6291CA7B19E142D700ACBA82 /* NSDate+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6291CA7A19E142D700ACBA82 /* NSDate+Utils.swift */; };
+		62BF6A4F1A10F8BC00811C72 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BF6A4E1A10F8BC00811C72 /* CalendarView.swift */; };
 		62D09CBD1A0104BA00EDB93A /* CGSize+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62D09CBC1A0104BA00EDB93A /* CGSize+Utils.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,6 +43,7 @@
 		6291CA7819E13E6800ACBA82 /* DateInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateInput.swift; sourceTree = "<group>"; };
 		6291CA7A19E142D700ACBA82 /* NSDate+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Utils.swift"; sourceTree = "<group>"; };
 		6291CA7C19E1440E00ACBA82 /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; };
+		62BF6A4E1A10F8BC00811C72 /* CalendarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		62D09CBC1A0104BA00EDB93A /* CGSize+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGSize+Utils.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -91,9 +93,10 @@
 				6291CA6119E13E5B00ACBA82 /* LaunchScreen.xib */,
 				6291CA5619E13E5B00ACBA82 /* Supporting Files */,
 				6291CA7819E13E6800ACBA82 /* DateInput.swift */,
+				62BF6A4E1A10F8BC00811C72 /* CalendarView.swift */,
 				6291CA7A19E142D700ACBA82 /* NSDate+Utils.swift */,
-				6291CA7C19E1440E00ACBA82 /* MyPlayground.playground */,
 				62D09CBC1A0104BA00EDB93A /* CGSize+Utils.swift */,
+				6291CA7C19E1440E00ACBA82 /* MyPlayground.playground */,
 			);
 			path = DateInput;
 			sourceTree = "<group>";
@@ -225,6 +228,7 @@
 			files = (
 				6291CA7B19E142D700ACBA82 /* NSDate+Utils.swift in Sources */,
 				6291CA7919E13E6800ACBA82 /* DateInput.swift in Sources */,
+				62BF6A4F1A10F8BC00811C72 /* CalendarView.swift in Sources */,
 				6291CA5B19E13E5B00ACBA82 /* ViewController.swift in Sources */,
 				62D09CBD1A0104BA00EDB93A /* CGSize+Utils.swift in Sources */,
 				6291CA5919E13E5B00ACBA82 /* AppDelegate.swift in Sources */,
