@@ -8,7 +8,7 @@
 
 import UIKit
 
-extension UIColor {
+private extension UIColor {
     class func colorWithWeekday (weekday: Int) -> UIColor {
         switch (weekday) {
         case 0:  return UIColor.redColor()
@@ -18,116 +18,136 @@ extension UIColor {
     }
 }
 
-class DayView: UIButton {
-    var day: Int? {
+private protocol CalendarViewDelegate {
+    func calendarView (dateView: CalendarView, didChangeTopTitle: String)
+}
+
+
+public class DateInput: UIView, CalendarViewDelegate {
+    private let headerLabel: UILabel!
+    private let body: CalendarView!
+   
+    public var callback: ((year: Int, month: Int, day: Int) -> ())? {
         didSet {
-            if let day = self.day {
-                self.label.text = "\(day)"
-                self.hidden     = false
-            } else {
-                self.hidden = true
-            }
+            self.body.callback = self.callback
         }
     }
-
-    private var label: UILabel!
-
-    required init(coder aDecoder: NSCoder) {
+    
+    required public init (coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+
+        self.headerLabel = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, 
+                                                   size: CGSize(width: self.frame.width, height: 44)))
+        self.addSubview(self.headerLabel)
         
-        self.label = UILabel(frame: self.frame)
+        self.body = CalendarView(coder: aDecoder)
+        self.body.frame = CGRect(origin: CGPoint(x: 0, y: 44),
+                                   size: CGSize(width: self.frame.width, height: self.frame.height - 44))
+        self.body.calendarViewDelegate = self
+        self.addSubview(self.body)
+       
+        self.bringSubviewToFront(self.headerLabel)
     }
 
-    init (frame: CGRect, weekday: Int) {
-        super.init(frame: frame)
-
-        self.hidden = true
-
-        self.label = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, size: frame.size))
-        self.label.textAlignment = .Center
-        self.label.textColor     = UIColor.colorWithWeekday(weekday)
-
-        self.addSubview(self.label)
+    public func reload (#year: Int, month: Int) {
+        self.body.reload(year: year, month: month)
+    }
+   
+    private func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String) {
+        self.headerLabel.text = topTitle
     }
 }
 
-public class DateInput: UIScrollView, UIScrollViewDelegate {
-    private let dateViewList: [DateView]!
 
-    public var callback: ((year: Int, month: Int, day: Int) -> ())? {
+private class CalendarView: UIScrollView, UIScrollViewDelegate {
+    let monthViewList: [CalendarMonthView]!
+
+    private var calendarViewDelegate: CalendarViewDelegate?
+
+    var callback: ((year: Int, month: Int, day: Int) -> ())? {
         didSet {
-            for dateView in self.dateViewList { dateView.callback = callback }
+            for monthView in self.monthViewList { monthView.callback = callback }
         }
     }
 
     private var year: Int!
     private var month: Int!
 
-    public func reload (#year: Int, month: Int, direction: Int = 0) {
+    func reload (#year: Int, month: Int, direction: Int = 0) {
         self.year  = year
         self.month = month
 
-        for (index, dateView) in enumerate(self.dateViewList) {
-            dateView.date = NSDate(year: year, month: month + index - 1, day: 1)
+        for (index, monthView) in enumerate(self.monthViewList) {
+            monthView.date = NSDate(year: year, month: month + index - 1, day: 1)
         }
     }
 
-    required public init(coder aDecoder: NSCoder) {
+    required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
        
-        self.dateViewList = (0..<4).map { _ -> DateView in return DateView(coder: aDecoder) }
-        self.contentSize  = DateView.size * CGSize(width: 1, height: self.dateViewList.count)
+        self.monthViewList = (0..<4).map { _ -> CalendarMonthView in return CalendarMonthView(coder: aDecoder) }
+        self.contentSize  = CalendarMonthView.size * CGSize(width: 1, height: self.monthViewList.count)
 
-        for (index, dateView) in enumerate(self.dateViewList) {
-            dateView.frame = CGRectOffset(dateView.frame, 0, DateView.size.height * CGFloat(index))
-            self.addSubview(dateView)
+        for (index, monthView) in enumerate(self.monthViewList) {
+            monthView.frame = CGRectOffset(monthView.frame, 0, CalendarMonthView.size.height * CGFloat(index))
+            self.addSubview(monthView)
         }
     }
 
-    func prev() {
+    private func prev() {
         self.reload(year: self.year, month: self.month - 1)
     }
 
-    func next() {
+    private func next() {
         self.reload(year: self.year, month: self.month + 1)
     }
 
-    public override func layoutSubviews() {
+    private var topTitle: String?
+
+    override func layoutSubviews() {
+        let topViewIndex = Int(self.contentOffset.y / CalendarMonthView.size.height)
+        let newTopTitle  = self.monthViewList[topViewIndex].title
+
+        if newTopTitle != self.topTitle {
+            self.topTitle = newTopTitle
+            self.calendarViewDelegate?.calendarView(self, didChangeTopTitle: self.topTitle!)
+        }
+
         if self.contentOffset.y < 0 {
             dispatch_async(dispatch_get_main_queue()) {
                 self.prev()
-                self.contentOffset.y += self.dateViewList[1].frame.origin.y
+                self.contentOffset.y += self.monthViewList[1].frame.origin.y
             }
-        } else if self.contentOffset.y > self.dateViewList[2].frame.origin.y {
+        } else if self.contentOffset.y > self.monthViewList[2].frame.origin.y {
             dispatch_async(dispatch_get_main_queue()) {
                 self.next()
-                self.contentOffset.y = self.dateViewList[1].frame.origin.y
+                self.contentOffset.y = self.monthViewList[1].frame.origin.y
             }
         }
     }
 }
 
 
-public class DateView: UIView {
+class CalendarMonthView: UIView {
     struct Constants {
         static let width  = 44
         static let height = 44
         static let size   = CGSize(width: width, height: height)
     }
    
-    public class var size: CGSize {
+    class var size: CGSize {
         get { return Constants.size * CGSize(width: 7, height: 7) }
     }
 
-    public var callback: ((year: Int, month: Int, day: Int) -> ())?
+    var callback: ((year: Int, month: Int, day: Int) -> ())?
    
-    public var title: String {
+    var title: String {
        let (year, month, _, _) = self.date.components
 
        return "\(year)/\(month)"
     }
 
-    public var date: NSDate! {
+    var date: NSDate! {
         didSet {
             configureView(date)
 
@@ -136,14 +156,14 @@ public class DateView: UIView {
     }
 
     let titleLabel: UILabel!
-    var dayViewList = [DayView]()
+    private var dayViewList = [CalendarDayView]()
 
-    required public init(coder aDecoder: NSCoder) {
+    required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.titleLabel = UILabel(frame: CGRect(origin: CGPoint.zeroPoint,
                                                   size: CGSize(width: self.frame.size.width, height: 44)))
         self.addSubview(self.titleLabel)
-        self.dayViewList = reduce((1...6), [DayView]()) {$0 + DateView.dayViews($1)}
+        self.dayViewList = reduce((1...6), [CalendarDayView]()) {$0 + CalendarMonthView.dayViews($1)}
 
         for dayView in self.dayViewList {
             dayView.addTarget(self, action: "onTouchDayView:", forControlEvents: .TouchUpInside)
@@ -151,17 +171,17 @@ public class DateView: UIView {
         }
     }
 
-    class func dayViews (weekOfMonth: Int) -> [DayView] {
-        return (0..<7).map { weekday -> DayView in
+    class func dayViews (weekOfMonth: Int) -> [CalendarDayView] {
+        return (0..<7).map { weekday in
             let x     = Constants.width  * weekday
             let y     = Constants.height * weekOfMonth
             let frame = CGRect(origin: CGPoint(x: x, y: y), size: Constants.size)
 
-            return DayView(frame: frame, weekday: weekday)
+            return CalendarDayView(frame: frame, weekday: weekday)
         }
     }
 
-    func onTouchDayView (sender: DayView) {
+    func onTouchDayView (sender: CalendarDayView) {
         if self.callback == nil { return }
 
         // dayがnilの場合は、押せない（非表示になっている）ので、無条件でdayをunwrapする
@@ -183,5 +203,39 @@ public class DateView: UIView {
                 dayView.day = day
             }
         }
+    }
+}
+
+
+class CalendarDayView: UIButton {
+    var day: Int? {
+        didSet {
+            if let day = self.day {
+                self.label.text = "\(day)"
+                self.hidden     = false
+            } else {
+                self.hidden = true
+            }
+        }
+    }
+
+    var label: UILabel!
+
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+
+        self.label = UILabel(frame: self.frame)
+    }
+
+    init (frame: CGRect, weekday: Int) {
+        super.init(frame: frame)
+
+        self.hidden = true
+
+        self.label = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, size: frame.size))
+        self.label.textAlignment = .Center
+        self.label.textColor     = UIColor.colorWithWeekday(weekday)
+
+        self.addSubview(self.label)
     }
 }
