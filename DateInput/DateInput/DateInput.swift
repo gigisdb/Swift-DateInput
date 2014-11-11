@@ -17,13 +17,13 @@ public class DateInput: UIView, CalendarViewDelegate {
     required public init (coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        self.headerLabel = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, 
-                                                   size: CGSize(width: self.frame.width, height: 44)))
+        // headerLabel
+        self.headerLabel = UILabel(frame: self.headerLabelFrame)
         self.addSubview(self.headerLabel)
         
+        // calendarView
         self.calendarView = CalendarView(coder: aDecoder)
-        self.calendarView.frame = CGRect(origin: CGPoint(x: 0, y: 44),
-                                           size: CGSize(width: self.frame.width, height: self.frame.height - 44))
+        self.calendarView.frame = self.calendarViewFrame
         self.calendarView.calendarViewDelegate = self
         self.addSubview(self.calendarView)
        
@@ -33,15 +33,30 @@ public class DateInput: UIView, CalendarViewDelegate {
     public func reload (#year: Int, month: Int) {
         self.calendarView.reload(year: year, month: month)
     }
+
+    
+    // MARK: Internal
    
     func calendarView (calendarView: CalendarView, didSelectDate selectedDate: NSDate) {
-        if callback == nil { return }
-
+        if self.callback == nil { return }
+   
         self.callback!(selectedDate: selectedDate)
     }
    
     func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String) {
         self.headerLabel.text = topTitle
+    }
+}
+
+extension DateInput {
+    var headerLabelFrame: CGRect {
+        return CGRect(origin: CGPoint.zeroPoint, size: CGSize(width: self.frame.width, height: 44))
+    }
+   
+    var calendarViewFrame: CGRect {
+        let headerSize = self.headerLabelFrame.size
+        return CGRect(origin: CGPoint(x: 0, y: headerSize.height),
+                        size: CGSize(width: headerSize.width, height: self.frame.height - headerSize.height))
     }
 }
 

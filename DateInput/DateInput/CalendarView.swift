@@ -38,7 +38,7 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
     private var year: Int!
     private var month: Int!
 
-    func reload (#year: Int, month: Int, direction: Int = 0) {
+    func reload (#year: Int, month: Int) {
         self.year  = year
         self.month = month
 
@@ -109,7 +109,7 @@ class CalendarMonthView: UIView {
     }
 
     class var size: CGSize {
-        get { return Constants.size * CGSize(width: 7, height: 7) }
+        return Constants.size * CGSize(width: 7, height: 7)
     }
 
     var callback: ((year: Int, month: Int, day: Int) -> ())?
@@ -129,22 +129,25 @@ class CalendarMonthView: UIView {
     }
 
     let titleLabel: UILabel!
-    var dayViewList = [CalendarDayView]()
+    let dayViewList = reduce((0..<6), [CalendarDayView]()) { $0 + CalendarMonthView.createDayViews($1) }
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.titleLabel = UILabel(frame: CGRect(origin: CGPoint.zeroPoint,
-            size: CGSize(width: self.frame.size.width, height: 44)))
+
+        self.titleLabel = UILabel(frame: self.titleLabelFrame)
         self.addSubview(self.titleLabel)
-        self.dayViewList = reduce((1...6), [CalendarDayView]()) {$0 + CalendarMonthView.dayViews($1)}
+
+        let dayViewContainer = UIView(frame: self.dayViewContainerFrame)
+        self.addSubview(dayViewContainer)
 
         for dayView in self.dayViewList {
             dayView.addTarget(self, action: "onTouchDayView:", forControlEvents: .TouchUpInside)
-            self.addSubview(dayView)
+
+            dayViewContainer.addSubview(dayView)
         }
     }
 
-    class func dayViews (weekOfMonth: Int) -> [CalendarDayView] {
+    class func createDayViews (weekOfMonth: Int) -> [CalendarDayView] {
         return (0..<7).map { weekday in
             let x     = Constants.width  * weekday
             let y     = Constants.height * weekOfMonth
@@ -172,10 +175,25 @@ class CalendarMonthView: UIView {
 
             if day < 1 || day > lastDay {
                 dayView.day = nil
-            } else {
+            }
+            else {
                 dayView.day = day
             }
         }
+    }
+}
+
+extension CalendarMonthView {
+    var titleLabelFrame: CGRect {
+        return CGRect(origin: CGPoint.zeroPoint, 
+                        size: CGSize(width: self.frame.width, height: 44))
+    }
+   
+    var dayViewContainerFrame: CGRect {
+        let titleLabelSize = self.titleLabelFrame.size
+
+        return CGRect(origin: CGPoint(x: 0, y: titleLabelSize.height), 
+                        size: Constants.size * CGSize(width: 7, height: 6))
     }
 }
 
@@ -186,7 +204,8 @@ class CalendarDayView: UIButton {
             if let day = self.day {
                 self.label.text = "\(day)"
                 self.hidden     = false
-            } else {
+            }
+            else {
                 self.hidden = true
             }
         }
