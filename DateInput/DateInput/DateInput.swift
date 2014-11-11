@@ -10,7 +10,7 @@ import UIKit
 
 public class DateInput: UIView, CalendarViewDelegate {
     private let headerLabel: UILabel!
-    private let body: CalendarView!
+    private let calendarView: CalendarView!
    
     public var callback: ((selectedDate: NSDate) -> ())?
 
@@ -21,17 +21,17 @@ public class DateInput: UIView, CalendarViewDelegate {
                                                    size: CGSize(width: self.frame.width, height: 44)))
         self.addSubview(self.headerLabel)
         
-        self.body = CalendarView(coder: aDecoder)
-        self.body.frame = CGRect(origin: CGPoint(x: 0, y: 44),
-                                   size: CGSize(width: self.frame.width, height: self.frame.height - 44))
-        self.body.calendarViewDelegate = self
-        self.addSubview(self.body)
+        self.calendarView = CalendarView(coder: aDecoder)
+        self.calendarView.frame = CGRect(origin: CGPoint(x: 0, y: 44),
+                                           size: CGSize(width: self.frame.width, height: self.frame.height - 44))
+        self.calendarView.calendarViewDelegate = self
+        self.addSubview(self.calendarView)
        
         self.bringSubviewToFront(self.headerLabel)
     }
 
     public func reload (#year: Int, month: Int) {
-        self.body.reload(year: year, month: month)
+        self.calendarView.reload(year: year, month: month)
     }
    
     func calendarView (calendarView: CalendarView, didSelectDate selectedDate: NSDate) {
