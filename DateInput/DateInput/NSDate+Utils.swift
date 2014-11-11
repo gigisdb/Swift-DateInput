@@ -8,13 +8,6 @@
 
 import Foundation
 
-enum Weekday: Int {
-    case Sunday = 1, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
-}
-func + (lhs: Weekday, rhs: Int) -> Weekday {
-    return Weekday(rawValue: (lhs.rawValue + rhs) % 7)!
-}
-
 extension NSDate {
     var year:    Int { return components.year }
     var month:   Int { return components.month }
