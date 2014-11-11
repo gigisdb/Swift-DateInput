@@ -19,7 +19,8 @@ private extension UIColor {
 }
 
 protocol CalendarViewDelegate {
-    func calendarView (dateView: CalendarView, didChangeTopTitle: String)
+    func calendarView (calendarView: CalendarView, didSelectDate selectedDate: NSDate)
+    func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String)
 }
 
 
@@ -50,6 +51,8 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
         super.init(coder: aDecoder)
 
         self.monthViewList = (0..<4).map { _ -> CalendarMonthView in return CalendarMonthView(coder: aDecoder) }
+        for monthView in self.monthViewList { monthView.callback = self.onTouchUpDayView }
+
         self.contentSize  = CalendarMonthView.size * CGSize(width: 1, height: self.monthViewList.count)
 
         for (index, monthView) in enumerate(self.monthViewList) {
@@ -88,6 +91,12 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
                 self.contentOffset.y = self.monthViewList[1].frame.origin.y
             }
         }
+    }
+
+    func onTouchUpDayView (year: Int, month: Int, day: Int) {
+        let selectedDate = NSDate(year: year, month: month, day: day)
+
+        self.calendarViewDelegate?.calendarView(self, didSelectDate: selectedDate)
     }
 }
 
@@ -145,7 +154,7 @@ class CalendarMonthView: UIView {
         }
     }
 
-    internal func onTouchDayView (sender: CalendarDayView) {
+    func onTouchDayView (sender: CalendarDayView) {
         if self.callback == nil { return }
 
         // dayがnilの場合は、押せない（非表示になっている）ので、無条件でdayをunwrapする

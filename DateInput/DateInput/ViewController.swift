@@ -15,7 +15,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.dateInput.reload(year: NSDate().year, month: NSDate().month)
-        self.dateInput.callback = { year, month, day in println("DAY: \(year)-\(month)-\(day)") }
+        self.dateInput.callback = { date in println("DAY: \(date.descriptionWithLocale(NSLocale.currentLocale()))") }
     }
 
     override func didReceiveMemoryWarning() {

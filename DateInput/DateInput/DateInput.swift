@@ -12,12 +12,8 @@ public class DateInput: UIView, CalendarViewDelegate {
     private let headerLabel: UILabel!
     private let body: CalendarView!
    
-    public var callback: ((year: Int, month: Int, day: Int) -> ())? {
-        didSet {
-            self.body.callback = self.callback
-        }
-    }
-    
+    public var callback: ((selectedDate: NSDate) -> ())?
+
     required public init (coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
@@ -36,6 +32,12 @@ public class DateInput: UIView, CalendarViewDelegate {
 
     public func reload (#year: Int, month: Int) {
         self.body.reload(year: year, month: month)
+    }
+   
+    func calendarView (calendarView: CalendarView, didSelectDate selectedDate: NSDate) {
+        if callback == nil { return }
+
+        self.callback!(selectedDate: selectedDate)
     }
    
     func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String) {
