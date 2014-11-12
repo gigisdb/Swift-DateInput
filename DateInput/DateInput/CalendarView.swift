@@ -50,12 +50,13 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
         self.monthViewList = (0..<4).map { _ -> CalendarMonthView in return CalendarMonthView(coder: aDecoder) }
         for monthView in self.monthViewList { monthView.callback = self.onTouchUpDayView }
 
-        self.contentSize  = CalendarMonthView.size * CGSize(width: 1, height: self.monthViewList.count)
-
         for (index, monthView) in enumerate(self.monthViewList) {
-            monthView.frame = CGRectOffset(monthView.frame, 0, CalendarMonthView.size.height * CGFloat(index))
+            monthView.frame = monthView.frame.rectByOffsetting(dx: 0, dy: 44 * 7 * CGFloat(index))
+            
             self.addSubview(monthView)
         }
+
+        self.contentSize = self.monthViewList.first!.frame.rectByUnion(self.monthViewList.last!.frame).size
     }
 
     
@@ -71,8 +72,10 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
     }
 
     override func layoutSubviews() {
-        let topViewIndex = Int(self.contentOffset.y / CalendarMonthView.size.height)
-        let newTopTitle  = self.monthViewList[topViewIndex].title
+        let contentOffsetY = self.contentOffset.y
+        let topView = self.monthViewList.filter { ($0.frame.minY...$0.frame.maxY ~= contentOffsetY) }.first
+
+        let newTopTitle = topView?.title ?? self.topTitle
 
         if newTopTitle != self.topTitle {
             self.topTitle = newTopTitle
@@ -123,10 +126,6 @@ class CalendarMonthView: UIView {
 
 
     // MARK: Properties
-
-    class var size: CGSize {
-        return Constants.size * CGSize(width: 7, height: 7)
-    }
 
     var callback: ((year: Int, month: Int, day: Int) -> ())?
 
@@ -205,6 +204,10 @@ class CalendarMonthView: UIView {
                 dayView.day = day
             }
         }
+        
+        let numWeekOfmonth = self.dayViewList[ self.dayViewList.count - 7 ].hidden ? 5 : 6
+        self.frame = CGRect(origin: self.frame.origin,
+                              size: Constants.size * CGSize(width: 7, height: numWeekOfmonth))
     }
 }
 
