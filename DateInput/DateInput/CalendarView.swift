@@ -25,7 +25,8 @@ protocol CalendarViewDelegate {
 
 
 class CalendarView: UIScrollView, UIScrollViewDelegate {
-    private let monthViewList: [CalendarMonthView]!
+
+    // MARK: Properties
 
     var calendarViewDelegate: CalendarViewDelegate?
 
@@ -35,17 +36,13 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
         }
     }
 
+    private let monthViewList: [CalendarMonthView]!
     private var year: Int!
     private var month: Int!
+    private var topTitle: String?
 
-    func reload (#year: Int, month: Int) {
-        self.year  = year
-        self.month = month
 
-        for (index, monthView) in enumerate(self.monthViewList) {
-            monthView.date = NSDate(year: year, month: month + index - 1, day: 1)
-        }
-    }
+    // MARK: Initializers
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -61,15 +58,17 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
         }
     }
 
-    private func prev() {
-        self.reload(year: self.year, month: self.month - 1)
-    }
+    
+    // MARK: Internal
 
-    private func next() {
-        self.reload(year: self.year, month: self.month + 1)
-    }
+    func reload (#year: Int, month: Int) {
+        self.year  = year
+        self.month = month
 
-    private var topTitle: String?
+        for (index, monthView) in enumerate(self.monthViewList) {
+            monthView.date = NSDate(year: year, month: month + index - 1, day: 1)
+        }
+    }
 
     override func layoutSubviews() {
         let topViewIndex = Int(self.contentOffset.y / CalendarMonthView.size.height)
@@ -98,15 +97,32 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
 
         self.calendarViewDelegate?.calendarView(self, didSelectDate: selectedDate)
     }
+   
+   
+    // MARK: Private
+
+    private func prev() {
+        self.reload(year: self.year, month: self.month - 1)
+    }
+
+    private func next() {
+        self.reload(year: self.year, month: self.month + 1)
+    }
 }
 
 
 class CalendarMonthView: UIView {
+
+    // MARK: Types
+
     struct Constants {
         static let width  = 44
         static let height = 44
         static let size   = CGSize(width: width, height: height)
     }
+
+
+    // MARK: Properties
 
     class var size: CGSize {
         return Constants.size * CGSize(width: 7, height: 7)
@@ -127,9 +143,12 @@ class CalendarMonthView: UIView {
             self.titleLabel.text = self.title
         }
     }
+   
+    private let titleLabel: UILabel!
+    private let dayViewList = reduce((0..<6), [CalendarDayView]()) { $0 + CalendarMonthView.createDayViews($1) }
 
-    let titleLabel: UILabel!
-    let dayViewList = reduce((0..<6), [CalendarDayView]()) { $0 + CalendarMonthView.createDayViews($1) }
+
+    // MARK: Initializers
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -146,6 +165,9 @@ class CalendarMonthView: UIView {
             dayViewContainer.addSubview(dayView)
         }
     }
+
+
+    // MARK: Internal
 
     class func createDayViews (weekOfMonth: Int) -> [CalendarDayView] {
         return (0..<7).map { weekday in
@@ -165,7 +187,10 @@ class CalendarMonthView: UIView {
         self.callback!(year: year, month: month, day: sender.day!)
     }
 
-    func configureView (date: NSDate) {
+   
+    // MARK: Private
+
+    private func configureView (date: NSDate) {
         // weekdayが1始まり（Sunday=1）なので、1を引く
         let startIndex = date.weekday - 1
         let lastDay    = date.lastDay
@@ -199,6 +224,9 @@ extension CalendarMonthView {
 
 
 class CalendarDayView: UIButton {
+
+    // MARK: Properties
+
     var day: Int? {
         didSet {
             if let day = self.day {
@@ -211,7 +239,10 @@ class CalendarDayView: UIButton {
         }
     }
 
-    var label: UILabel!
+    private var label: UILabel!
+
+
+    // MARK: Initializers
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)

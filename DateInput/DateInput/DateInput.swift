@@ -9,10 +9,16 @@
 import UIKit
 
 public class DateInput: UIView, CalendarViewDelegate {
-    private let headerLabel: UILabel!
-    private let calendarView: CalendarView!
+
+    // MARK: Properties
    
     public var callback: ((selectedDate: NSDate) -> ())?
+    
+    private let headerLabel: UILabel!
+    private let calendarView: CalendarView!
+
+
+    // MARK: Initializers
 
     required public init (coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -29,6 +35,9 @@ public class DateInput: UIView, CalendarViewDelegate {
        
         self.bringSubviewToFront(self.headerLabel)
     }
+
+
+    // MARK: Public
 
     public func reload (#year: Int, month: Int) {
         self.calendarView.reload(year: year, month: month)
