@@ -18,7 +18,7 @@ private extension UIColor {
     }
 }
 
-protocol CalendarViewDelegate {
+protocol CalendarViewDelegate: class {
     func calendarView (calendarView: CalendarView, didSelectDate selectedDate: NSDate)
     func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String)
 }
@@ -28,7 +28,7 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
 
     // MARK: Properties
 
-    var calendarViewDelegate: CalendarViewDelegate?
+    weak var calendarViewDelegate: CalendarViewDelegate?
 
     var callback: ((year: Int, month: Int, day: Int) -> ())? {
         didSet {

@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class DateInput: UIView, CalendarViewDelegate {
+public class DateInput: UIView {
 
     // MARK: Properties
    
@@ -42,19 +42,6 @@ public class DateInput: UIView, CalendarViewDelegate {
     public func reload (#year: Int, month: Int) {
         self.calendarView.reload(year: year, month: month)
     }
-
-    
-    // MARK: Internal
-   
-    func calendarView (calendarView: CalendarView, didSelectDate selectedDate: NSDate) {
-        if self.callback == nil { return }
-   
-        self.callback!(selectedDate: selectedDate)
-    }
-   
-    func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String) {
-        self.headerLabel.text = topTitle
-    }
 }
 
 extension DateInput {
@@ -66,6 +53,18 @@ extension DateInput {
         let headerSize = self.headerLabelFrame.size
         return CGRect(origin: CGPoint(x: 0, y: headerSize.height),
                         size: CGSize(width: headerSize.width, height: self.frame.height - headerSize.height))
+    }
+}
+
+extension DateInput: CalendarViewDelegate {
+    func calendarView (calendarView: CalendarView, didSelectDate selectedDate: NSDate) {
+        if self.callback == nil { return }
+
+        self.callback!(selectedDate: selectedDate)
+    }
+
+    func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String) {
+        self.headerLabel.text = topTitle
     }
 }
 
