@@ -8,12 +8,29 @@
 
 import UIKit
 
+private enum Weekday: Int {
+    case Sunday = 1, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
+
+    static var All: [Weekday] {
+        return [.Sunday,
+                .Monday,
+                .Tuesday,
+                .Wednesday,
+                .Thursday,
+                .Friday,
+                .Saturday]
+    }
+   
+    static let Count = 7
+}
+
 private extension UIColor {
-    class func colorWithWeekday (weekday: Int) -> UIColor {
+    class func colorWithWeekday (weekday: Weekday) -> UIColor {
         switch (weekday) {
-        case 0:  return UIColor.redColor()
-        case 6:  return UIColor.blueColor()
-        default: return UIColor.blackColor()
+        case .Sunday:    return UIColor.redColor()
+        case .Saturday:  return UIColor.blueColor()
+        default:
+            return UIColor.blackColor()
         }
     }
 }
@@ -51,7 +68,7 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
         for monthView in self.monthViewList { monthView.callback = self.onTouchUpDayView }
 
         for (index, monthView) in enumerate(self.monthViewList) {
-            monthView.frame = monthView.frame.rectByOffsetting(dx: 0, dy: 44 * 7 * CGFloat(index))
+            monthView.frame = monthView.frame.rectByOffsetting(dx: 0, dy: CGFloat(44 * Weekday.Count * index))
             
             self.addSubview(monthView)
         }
@@ -169,8 +186,8 @@ class CalendarMonthView: UIView {
     // MARK: Internal
 
     class func createDayViews (weekOfMonth: Int) -> [CalendarDayView] {
-        return (0..<7).map { weekday in
-            let x     = Constants.width  * weekday
+        return Array( enumerate(Weekday.All) ).map { index, weekday in
+            let x     = Constants.width  * index
             let y     = Constants.height * weekOfMonth
             let frame = CGRect(origin: CGPoint(x: x, y: y), size: Constants.size)
 
@@ -205,9 +222,9 @@ class CalendarMonthView: UIView {
             }
         }
         
-        let numWeekOfmonth = self.dayViewList[ self.dayViewList.count - 7 ].hidden ? 5 : 6
+        let numWeekOfmonth = self.dayViewList[ self.dayViewList.count - Weekday.Count ].hidden ? 5 : 6
         self.frame = CGRect(origin: self.frame.origin,
-                              size: Constants.size * CGSize(width: 7, height: numWeekOfmonth))
+                              size: Constants.size * CGSize(width: Weekday.Count, height: numWeekOfmonth))
     }
 }
 
@@ -221,7 +238,7 @@ extension CalendarMonthView {
         let titleLabelSize = self.titleLabelFrame.size
 
         return CGRect(origin: CGPoint(x: 0, y: titleLabelSize.height), 
-                        size: Constants.size * CGSize(width: 7, height: 6))
+                        size: Constants.size * CGSize(width: Weekday.Count, height: 6))
     }
 }
 
@@ -253,7 +270,7 @@ class CalendarDayView: UIButton {
         self.label = UILabel(frame: self.frame)
     }
 
-    init (frame: CGRect, weekday: Int) {
+    private init (frame: CGRect, weekday: Weekday) {
         super.init(frame: frame)
 
         self.hidden = true
