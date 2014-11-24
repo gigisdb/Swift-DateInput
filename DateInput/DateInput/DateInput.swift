@@ -25,6 +25,7 @@ public class DateInput: UIView {
 
         // headerLabel
         _headerLabel = UILabel(frame: _headerLabelFrame)
+        _headerLabel.alpha = 0
         self.addSubview(_headerLabel)
         
         // calendarView
@@ -32,7 +33,7 @@ public class DateInput: UIView {
         _calendarView.frame = _calendarViewFrame
         _calendarView.calendarViewDelegate = self
         self.addSubview(_calendarView)
-       
+
         self.bringSubviewToFront(_headerLabel)
     }
 
@@ -64,7 +65,18 @@ extension DateInput: CalendarViewDelegate {
     }
 
     func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String) {
-        _headerLabel.text = topTitle
+        if _headerLabel.text == nil {
+            // 前回が空（初期表示時）はアニメーションしない
+            _headerLabel.text = topTitle
+            return 
+        }
+
+        _headerLabel.text  = topTitle
+        _headerLabel.alpha = 1
+
+        UIView.animateWithDuration(1.5) {
+            self._headerLabel.alpha = 0
+        }
     }
 }
 
