@@ -26,16 +26,14 @@ enum Weekday: Int {
 }
 
 class CalendarMonth {
-    private let _year: Int
-    private let _month: Int
     private let _lastDate: (year: Int, month: Int, day: Int, weekday: Int)
 
     var year: Int {
-        return _year
+        return _lastDate.year
     }
 
     var month: Int {
-        return _month
+        return _lastDate.month
     }
 
     var firstDay: Int {
@@ -67,8 +65,6 @@ class CalendarMonth {
     }
 
     init (year: Int, month: Int) {
-        _year     = year
-        _month    = month
         _lastDate = NSDate(year: year, month: month + 1, day: 0).components
     }
 }
