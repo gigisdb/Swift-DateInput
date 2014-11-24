@@ -14,8 +14,8 @@ public class DateInput: UIView {
    
     public var callback: ((selectedDate: NSDate) -> ())?
     
-    private let headerLabel: UILabel!
-    private let calendarView: CalendarView!
+    private let _headerLabel: UILabel!
+    private let _calendarView: CalendarView!
 
 
     // MARK: Initializers
@@ -24,33 +24,33 @@ public class DateInput: UIView {
         super.init(coder: aDecoder)
 
         // headerLabel
-        self.headerLabel = UILabel(frame: self.headerLabelFrame)
-        self.addSubview(self.headerLabel)
+        _headerLabel = UILabel(frame: _headerLabelFrame)
+        self.addSubview(_headerLabel)
         
         // calendarView
-        self.calendarView = CalendarView(coder: aDecoder)
-        self.calendarView.frame = self.calendarViewFrame
-        self.calendarView.calendarViewDelegate = self
-        self.addSubview(self.calendarView)
+        _calendarView = CalendarView(coder: aDecoder)
+        _calendarView.frame = _calendarViewFrame
+        _calendarView.calendarViewDelegate = self
+        self.addSubview(_calendarView)
        
-        self.bringSubviewToFront(self.headerLabel)
+        self.bringSubviewToFront(_headerLabel)
     }
 
 
     // MARK: Public
 
     public func reload (#year: Int, month: Int) {
-        self.calendarView.reload(year: year, month: month)
+        _calendarView.reload(year: year, month: month)
     }
 }
 
-extension DateInput {
-    var headerLabelFrame: CGRect {
+private extension DateInput {
+    var _headerLabelFrame: CGRect {
         return CGRect(origin: CGPoint.zeroPoint, size: CGSize(width: self.frame.width, height: 44))
     }
    
-    var calendarViewFrame: CGRect {
-        let headerSize = self.headerLabelFrame.size
+    var _calendarViewFrame: CGRect {
+        let headerSize = _headerLabelFrame.size
         return CGRect(origin: CGPoint(x: 0, y: headerSize.height),
                         size: CGSize(width: headerSize.width, height: self.frame.height - headerSize.height))
     }
@@ -64,7 +64,7 @@ extension DateInput: CalendarViewDelegate {
     }
 
     func calendarView (calendarView: CalendarView, didChangeTopTitle topTitle: String) {
-        self.headerLabel.text = topTitle
+        _headerLabel.text = topTitle
     }
 }
 

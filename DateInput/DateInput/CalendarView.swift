@@ -8,22 +8,6 @@
 
 import UIKit
 
-private enum Weekday: Int {
-    case Sunday = 1, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
-
-    static var All: [Weekday] {
-        return [.Sunday,
-                .Monday,
-                .Tuesday,
-                .Wednesday,
-                .Thursday,
-                .Friday,
-                .Saturday]
-    }
-   
-    static let Count = 7
-}
-
 private extension UIColor {
     class func colorWithWeekday (weekday: Weekday) -> UIColor {
         switch (weekday) {
@@ -49,14 +33,14 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
 
     var callback: ((year: Int, month: Int, day: Int) -> ())? {
         didSet {
-            for monthView in self.monthViewList { monthView.callback = callback }
+            for monthView in _monthViewList { monthView.callback = callback }
         }
     }
 
-    private let monthViewList: [CalendarMonthView]!
-    private var year: Int!
-    private var month: Int!
-    private var topTitle: String?
+    private let _monthViewList: [CalendarMonthView]!
+    private var _year: Int!
+    private var _month: Int!
+    private var _topTitle: String?
 
 
     // MARK: Initializers
@@ -64,50 +48,51 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        self.monthViewList = (0..<4).map { _ -> CalendarMonthView in return CalendarMonthView(coder: aDecoder) }
-        for monthView in self.monthViewList { monthView.callback = self.onTouchUpDayView }
+        _monthViewList = (0..<4).map { _ -> CalendarMonthView in return CalendarMonthView(coder: aDecoder) }
 
-        for (index, monthView) in enumerate(self.monthViewList) {
+        for monthView in _monthViewList { monthView.callback = self.onTouchUpDayView }
+
+        for (index, monthView) in enumerate(_monthViewList) {
             monthView.frame = monthView.frame.rectByOffsetting(dx: 0, dy: CGFloat(44 * Weekday.Count * index))
             
             self.addSubview(monthView)
         }
 
-        self.contentSize = self.monthViewList.first!.frame.rectByUnion(self.monthViewList.last!.frame).size
+        self.contentSize = _monthViewList.first!.frame.rectByUnion(_monthViewList.last!.frame).size
     }
 
     
     // MARK: Internal
 
     func reload (#year: Int, month: Int) {
-        self.year  = year
-        self.month = month
+        _year  = year
+        _month = month
 
-        for (index, monthView) in enumerate(self.monthViewList) {
-            monthView.date = NSDate(year: year, month: month + index - 1, day: 1)
+        for (index, monthView) in enumerate(_monthViewList) {
+            monthView.update(year: year, month: month + index - 1)
         }
     }
 
     override func layoutSubviews() {
         let contentOffsetY = self.contentOffset.y
-        let topView = self.monthViewList.filter { ($0.frame.minY...$0.frame.maxY ~= contentOffsetY) }.first
+        let topView = _monthViewList.filter { ($0.frame.minY...$0.frame.maxY ~= contentOffsetY) }.first
 
-        let newTopTitle = topView?.title ?? self.topTitle
+        let newTopTitle = topView?.title ?? _topTitle
 
-        if newTopTitle != self.topTitle {
-            self.topTitle = newTopTitle
-            self.calendarViewDelegate?.calendarView(self, didChangeTopTitle: self.topTitle!)
+        if newTopTitle != _topTitle {
+            _topTitle = newTopTitle
+            self.calendarViewDelegate?.calendarView(self, didChangeTopTitle: _topTitle!)
         }
 
         if self.contentOffset.y < 0 {
             dispatch_async(dispatch_get_main_queue()) {
                 self.prev()
-                self.contentOffset.y += self.monthViewList[1].frame.origin.y
+                self.contentOffset.y += self._monthViewList[1].frame.origin.y
             }
-        } else if self.contentOffset.y > self.monthViewList[2].frame.origin.y {
+        } else if self.contentOffset.y > _monthViewList[2].frame.origin.y {
             dispatch_async(dispatch_get_main_queue()) {
                 self.next()
-                self.contentOffset.y = self.monthViewList[1].frame.origin.y
+                self.contentOffset.y = self._monthViewList[1].frame.origin.y
             }
         }
     }
@@ -122,11 +107,11 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
     // MARK: Private
 
     private func prev() {
-        self.reload(year: self.year, month: self.month - 1)
+        self.reload(year: _year, month: _month - 1)
     }
 
     private func next() {
-        self.reload(year: self.year, month: self.month + 1)
+        self.reload(year: _year, month: _month + 1)
     }
 }
 
@@ -147,21 +132,19 @@ class CalendarMonthView: UIView {
     var callback: ((year: Int, month: Int, day: Int) -> ())?
 
     var title: String {
-        let (year, month, _, _) = self.date.components
-
-        return "\(year)/\(month)"
+        return "\(_calendarMonth.year)/\(_calendarMonth.month)"
     }
 
-    var date: NSDate! {
+    private var _calendarMonth: CalendarMonth! {
         didSet {
-            configureView(date)
+            configureView(_calendarMonth)
 
-            self.titleLabel.text = self.title
+            _titleLabel.text = self.title
         }
     }
    
-    private let titleLabel: UILabel!
-    private let dayViewList = reduce((0..<6), [CalendarDayView]()) { $0 + CalendarMonthView.createDayViews($1) }
+    private let _titleLabel: UILabel!
+    private let _dayViewList = reduce((0..<6), [CalendarDayView]()) { $0 + CalendarMonthView.createDayViews($1) }
 
 
     // MARK: Initializers
@@ -169,13 +152,13 @@ class CalendarMonthView: UIView {
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        self.titleLabel = UILabel(frame: self.titleLabelFrame)
-        self.addSubview(self.titleLabel)
+        _titleLabel = UILabel(frame: _titleLabelFrame)
+        self.addSubview(_titleLabel)
 
-        let dayViewContainer = UIView(frame: self.dayViewContainerFrame)
+        let dayViewContainer = UIView(frame: _dayViewContainerFrame)
         self.addSubview(dayViewContainer)
 
-        for dayView in self.dayViewList {
+        for dayView in _dayViewList {
             dayView.addTarget(self, action: "onTouchDayView:", forControlEvents: .TouchUpInside)
 
             dayViewContainer.addSubview(dayView)
@@ -195,23 +178,26 @@ class CalendarMonthView: UIView {
         }
     }
 
+    func update (#year: Int, month: Int) {
+        _calendarMonth = CalendarMonth(year: year, month: month)
+    }
+
     func onTouchDayView (sender: CalendarDayView) {
         if self.callback == nil { return }
 
         // dayがnilの場合は、押せない（非表示になっている）ので、無条件でdayをunwrapする
-        let (year, month, _, _) = self.date.components
-        self.callback!(year: year, month: month, day: sender.day!)
+        self.callback!(year: _calendarMonth.year, month: _calendarMonth.month, day: sender.day!)
     }
 
    
     // MARK: Private
 
-    private func configureView (date: NSDate) {
+    private func configureView (calendarMonth: CalendarMonth) {
         // weekdayが1始まり（Sunday=1）なので、1を引く
-        let startIndex = date.weekday - 1
-        let lastDay    = date.lastDay
+        let startIndex = _calendarMonth.firstWeekday.rawValue - 1
+        let lastDay    = _calendarMonth.lastDay
 
-        for (index, dayView) in enumerate(self.dayViewList) {
+        for (index, dayView) in enumerate(_dayViewList) {
             let day = index - startIndex + 1
 
             if day < 1 || day > lastDay {
@@ -222,20 +208,20 @@ class CalendarMonthView: UIView {
             }
         }
         
-        let numWeekOfmonth = self.dayViewList[ self.dayViewList.count - Weekday.Count ].hidden ? 6 : 7
+        let heightCount = _calendarMonth.numWeekOfMonth + 1
         self.frame = CGRect(origin: self.frame.origin,
-                              size: Constants.size * CGSize(width: Weekday.Count, height: numWeekOfmonth))
+                              size: Constants.size * CGSize(width: Weekday.Count, height: heightCount))
     }
 }
 
-extension CalendarMonthView {
-    var titleLabelFrame: CGRect {
+private extension CalendarMonthView {
+    var _titleLabelFrame: CGRect {
         return CGRect(origin: CGPoint.zeroPoint, 
                         size: CGSize(width: self.frame.width, height: 44))
     }
    
-    var dayViewContainerFrame: CGRect {
-        let titleLabelSize = self.titleLabelFrame.size
+    var _dayViewContainerFrame: CGRect {
+        let titleLabelSize = _titleLabelFrame.size
 
         return CGRect(origin: CGPoint(x: 0, y: titleLabelSize.height), 
                         size: Constants.size * CGSize(width: Weekday.Count, height: 6))
@@ -250,8 +236,8 @@ class CalendarDayView: UIButton {
     var day: Int? {
         didSet {
             if let day = self.day {
-                self.label.text = "\(day)"
-                self.hidden     = false
+                _label.text = "\(day)"
+                self.hidden = false
             }
             else {
                 self.hidden = true
@@ -259,7 +245,7 @@ class CalendarDayView: UIButton {
         }
     }
 
-    private var label: UILabel!
+    private var _label: UILabel!
 
 
     // MARK: Initializers
@@ -267,7 +253,7 @@ class CalendarDayView: UIButton {
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        self.label = UILabel(frame: self.frame)
+        _label = UILabel(frame: self.frame)
     }
 
     private init (frame: CGRect, weekday: Weekday) {
@@ -275,10 +261,10 @@ class CalendarDayView: UIButton {
 
         self.hidden = true
 
-        self.label = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, size: frame.size))
-        self.label.textAlignment = .Center
-        self.label.textColor     = UIColor.colorWithWeekday(weekday)
+        _label = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, size: frame.size))
+        _label.textAlignment = .Center
+        _label.textColor     = UIColor.colorWithWeekday(weekday)
         
-        self.addSubview(self.label)
+        self.addSubview(_label)
     }
 }
