@@ -222,7 +222,7 @@ class CalendarMonthView: UIView {
             }
         }
         
-        let numWeekOfmonth = self.dayViewList[ self.dayViewList.count - Weekday.Count ].hidden ? 5 : 6
+        let numWeekOfmonth = self.dayViewList[ self.dayViewList.count - Weekday.Count ].hidden ? 6 : 7
         self.frame = CGRect(origin: self.frame.origin,
                               size: Constants.size * CGSize(width: Weekday.Count, height: numWeekOfmonth))
     }
