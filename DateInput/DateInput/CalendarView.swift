@@ -264,6 +264,8 @@ class CalendarDayView: UIButton {
         _label = UILabel(frame: CGRect(origin: CGPoint.zeroPoint, size: frame.size))
         _label.textAlignment = .Center
         _label.textColor     = UIColor.colorWithWeekday(weekday)
+
+        self.setBackgroundImage(UIImage(named: "calendar-day-background"), forState: .Normal)
         
         self.addSubview(_label)
     }
