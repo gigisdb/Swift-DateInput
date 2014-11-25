@@ -48,6 +48,8 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
+        self.clipsToBounds = true
+
         _monthViewList = (0..<4).map { _ -> CalendarMonthView in return CalendarMonthView(coder: aDecoder) }
 
         for monthView in _monthViewList { monthView.callback = self.onTouchUpDayView }
