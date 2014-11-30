@@ -2,20 +2,20 @@
 //  CalendarMonthTests.swift
 //  DateInput
 //
-//  Created by 石田純一 on 11/24/14.
+//  Created by 石田純一 on 11/29/14.
 //  Copyright (c) 2014 Junichi Ishida. All rights reserved.
 //
 
 import UIKit
 import XCTest
 
-class CalendarTests: XCTestCase {
+class CalendarMonthTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
-    
+
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
@@ -31,8 +31,8 @@ class CalendarTests: XCTestCase {
         XCTAssertEqual(calendar_201410.lastDay, 31)
         XCTAssertEqual(calendar_201410.firstWeekday, Weekday.Wednesday, "\(calendar_201410.firstWeekday.rawValue)")
         XCTAssertEqual(calendar_201410.numWeekOfMonth, 5)
-       
-       
+
+
         // 2014/11
         let calendar_201411 = CalendarMonth(year: 2014, month: 11)
 
@@ -73,5 +73,4 @@ class CalendarTests: XCTestCase {
             let calendarMonth = CalendarMonth(year: 2014, month: 14)
         }
     }
-
 }
