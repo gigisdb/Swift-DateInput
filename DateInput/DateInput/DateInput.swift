@@ -13,10 +13,14 @@ public class DateInput: UIView {
     // MARK: Properties
    
     public var callback: ((selectedDate: NSDate) -> ())?
+    public var backgroundImageForCalendarDay: UIImage? {
+        didSet {
+            _calendarView.backgroundImageForCalendarDay = backgroundImageForCalendarDay
+        }
+    }
     
     private let _headerLabel: UILabel!
     private let _calendarView: CalendarView!
-
 
     // MARK: Initializers
 

@@ -30,6 +30,14 @@ class CalendarView: UIScrollView, UIScrollViewDelegate {
     // MARK: Properties
 
     weak var calendarViewDelegate: CalendarViewDelegate?
+   
+    var backgroundImageForCalendarDay: UIImage? {
+        didSet {
+            for monthView in _monthViewList {
+                monthView.backgroundImageForCalendarDay = backgroundImageForCalendarDay
+            }
+        }
+    }
 
     var callback: ((year: Int, month: Int, day: Int) -> ())? {
         didSet {
@@ -130,6 +138,14 @@ class CalendarMonthView: UIView {
 
 
     // MARK: Properties
+   
+    var backgroundImageForCalendarDay: UIImage? {
+        didSet {
+            for dayView in _dayViewList {
+                dayView.setBackgroundImage(backgroundImageForCalendarDay, forState: .Normal)
+            }
+        }
+    }
 
     var callback: ((year: Int, month: Int, day: Int) -> ())?
 
